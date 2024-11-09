@@ -1,13 +1,39 @@
-import { DateTime } from 'luxon'
-import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
+import { DateTime } from "luxon";
+import { BaseModel, column, HasMany, hasMany } from "@ioc:Adonis/Lucid/Orm";
+import Message from "App/Models/Message";
+
+export enum ChannelType {
+  Public = "public",
+  Private = "private",
+}
 
 export default class Channel extends BaseModel {
   @column({ isPrimary: true })
-  public id: number
+  public id: number;
+
+  @column()
+  public createdBy: number;
+
+  @column()
+  public name: string;
+
+  @column()
+  public type: ChannelType;
+
+  @column()
+  public numberOfUsers: number;
+
+  @column()
+  public numberOfMessages: number;
 
   @column.dateTime({ autoCreate: true })
-  public createdAt: DateTime
+  public createdAt: DateTime;
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  public updatedAt: DateTime
+  public updatedAt: DateTime;
+
+  @hasMany(() => Message, {
+    foreignKey: "channelId",
+  })
+  public messages: HasMany<typeof Message>;
 }
