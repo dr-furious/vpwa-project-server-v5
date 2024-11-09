@@ -2,9 +2,9 @@ import { DateTime } from "luxon";
 import { BaseModel, column, HasMany, hasMany } from "@ioc:Adonis/Lucid/Orm";
 import Message from "App/Models/Message";
 
-enum ChannelType {
-  PUBLIC = "public",
-  PRIVATE = "private",
+export enum ChannelType {
+  Public = "public",
+  Private = "private",
 }
 
 export default class Channel extends BaseModel {
