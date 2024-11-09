@@ -29,6 +29,7 @@ export default class extends BaseSchema {
           "kicked_out",
         ])
         .defaultTo("in_channel");
+      table.integer("kicks").unsigned().notNullable().defaultTo(0);
       table.unique(["user_id", "channel_id"]);
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL

@@ -6,7 +6,12 @@ export default class extends BaseSchema {
   public async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments("id").primary();
-      table.integer("created_by").notNullable();
+      table
+        .integer("created_by")
+        .notNullable()
+        .references("id")
+        .inTable("users")
+        .onDelete("CASCADE");
       table.string("name").notNullable().unique();
       table
         .enum("type", ["private", "public"])
