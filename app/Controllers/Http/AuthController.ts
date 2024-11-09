@@ -5,8 +5,10 @@ import RegisterUserValidator from "App/Validators/RegisterUserValidator";
 
 export default class AuthController {
   async register({ request }: HttpContextContract) {
+
     // if invalid, exception
     const data = await request.validate(RegisterUserValidator);
+    console.table(data);
 
     const user = await User.create(data);
     // join user to general channel
