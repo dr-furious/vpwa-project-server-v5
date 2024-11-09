@@ -1,21 +1,25 @@
-import BaseSchema from '@ioc:Adonis/Lucid/Schema'
+import BaseSchema from "@ioc:Adonis/Lucid/Schema";
 
-export default class extends BaseSchema {
-  protected tableName = 'channels'
+export default class Channels extends BaseSchema {
+  protected tableName = "channels";
 
-  public async up () {
+  public async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.increments('id')
-
+      table.increments("id").primary();
+      table.integer("created_by").notNullable().unique();
+      table.string("name").notNullable().unique();
+      table.enum("type", ["private", "public"]).defaultTo("public");
+      table.integer("number_of_users").defaultTo(1);
+      table.integer("number_of_messages").defaultTo(0);
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
        */
-      table.timestamp('created_at', { useTz: true })
-      table.timestamp('updated_at', { useTz: true })
-    })
+      table.timestamp("created_at", { useTz: true });
+      table.timestamp("updated_at", { useTz: true });
+    });
   }
 
-  public async down () {
-    this.schema.dropTable(this.tableName)
+  public async down() {
+    this.schema.dropTable(this.tableName);
   }
 }
