@@ -7,6 +7,7 @@ export default class ChannelSeeder extends BaseSeeder {
 
     await Channel.updateOrCreateMany(uniqueKey, [
       {
+        createdBy: 1,
         name: "general",
       },
     ]);

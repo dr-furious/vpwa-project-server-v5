@@ -20,6 +20,15 @@ export default class extends BaseSchema {
         .references("id")
         .inTable("channels")
         .onDelete("CASCADE");
+      table.enum("user_role", ["admin", "member"]).defaultTo("member");
+      table
+        .enum("user_channel_status", [
+          "pending_invite",
+          "in_channel",
+          "left_channel",
+          "kicked_out",
+        ])
+        .defaultTo("in_channel");
       table.unique(["user_id", "channel_id"]);
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL

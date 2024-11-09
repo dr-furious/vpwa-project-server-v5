@@ -6,7 +6,11 @@ export default class Channels extends BaseSchema {
   public async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments("id").primary();
+      table.integer("created_by").notNullable().unique();
       table.string("name").notNullable().unique();
+      table.enum("type", ["private", "public"]).defaultTo("public");
+      table.integer("number_of_users").defaultTo(1);
+      table.integer("number_of_messages").defaultTo(0);
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
        */
