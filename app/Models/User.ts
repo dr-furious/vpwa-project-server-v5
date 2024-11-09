@@ -12,12 +12,36 @@ import {
 import Channel from "App/Models/Channel";
 import Message from "App/Models/Message";
 
+export enum UserStatus {
+  Active = "active",
+  Offline = "offline",
+  DND = "do not disturb",
+}
+
+export enum UserNotificationSetting {
+  ShowAll = "all",
+  ShowMentions = "mentionsOnly",
+  Off = "off",
+}
+
 export default class User extends BaseModel {
   @column({ isPrimary: true })
   public id: number;
 
   @column()
   public email: string;
+
+  @column()
+  public fullName: string;
+
+  @column()
+  public nickName: string;
+
+  @column()
+  public status: UserStatus;
+
+  @column()
+  public notificationSetting: UserNotificationSetting;
 
   @column({ serializeAs: null })
   public password: string;
