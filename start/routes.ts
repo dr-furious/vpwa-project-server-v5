@@ -22,7 +22,7 @@ import Route from "@ioc:Adonis/Core/Route";
 
 Route.get("/", async () => {
   return { hello: "world" };
-});
+}).middleware("auth");
 
 Route.group(() => {
   Route.post("register", "AuthController.register");
