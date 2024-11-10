@@ -5,7 +5,7 @@
  * file.
  */
 
-declare module '@ioc:Adonis/Core/Event' {
+declare module "@ioc:Adonis/Core/Event" {
   /*
   |--------------------------------------------------------------------------
   | Define typed events
@@ -26,6 +26,11 @@ declare module '@ioc:Adonis/Core/Event' {
   |
   */
   interface EventsList {
-    //
+    "user:kicksIncreased": { userId: number; channelId: number };
+    "user:leftChannel": {
+      userId: number;
+      channelId: number;
+      isAdmin: boolean;
+    };
   }
 }
