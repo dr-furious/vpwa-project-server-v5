@@ -31,7 +31,8 @@
         "test"
       ],
       "optional": true
-    }
+    },
+    "./start/events"
   ],
   "providers": [
     "./providers/AppProvider",

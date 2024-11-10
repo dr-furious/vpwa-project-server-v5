@@ -22,7 +22,7 @@ import Route from "@ioc:Adonis/Core/Route";
 
 Route.get("/", async () => {
   return { hello: "world" };
-});
+}).middleware("auth");
 
 Route.group(() => {
   Route.post("register", "AuthController.register");
@@ -30,3 +30,10 @@ Route.group(() => {
   Route.post("logout", "AuthController.logout").middleware("auth");
   Route.get("me", "AuthController.me").middleware("auth");
 }).prefix("auth");
+
+Route.group(() => {
+  Route.patch(
+    "channels/:channel_id/users/:user_id/status",
+    "ChannelUsersController.updateStatus",
+  );
+}).middleware("auth");

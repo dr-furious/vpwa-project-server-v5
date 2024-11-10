@@ -1,11 +1,10 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import Channel from "App/Models/Channel";
 import User from "App/Models/User";
 import RegisterUserValidator from "App/Validators/RegisterUserValidator";
+import LoginUserValidator from "App/Validators/LoginUserValidator";
 
 export default class AuthController {
   async register({ request }: HttpContextContract) {
-
     // if invalid, exception
     const data = await request.validate(RegisterUserValidator);
     console.table(data);
@@ -19,8 +18,9 @@ export default class AuthController {
   }
 
   async login({ auth, request }: HttpContextContract) {
-    const email = request.input("email");
-    const password = request.input("password");
+    const data = await request.validate(LoginUserValidator);
+    const email = data.email;
+    const password = data.password;
 
     return auth.use("api").attempt(email, password);
   }
