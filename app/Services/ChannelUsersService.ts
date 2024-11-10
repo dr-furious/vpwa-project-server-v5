@@ -73,18 +73,23 @@ class ChannelUsersService {
     });
   }
 
+  public async getNumberOfKicks(
+    channelId: number,
+    userId: number,
+  ): Promise<number> {
+    return await (await User.findOrFail(userId))
+      .related("channels")
+      .pivotQuery()
+      .where("channel_id", channelId)
+      .firstOrFail();
+  }
+
   // Update number of kicks
   private async updateKickCount(
     channelId: number,
     userId: number,
   ): Promise<void> {
-    // Find the user and access the pivot data for the channel
-    const userChannelPivot = await (await User.findOrFail(userId))
-      .related("channels")
-      .pivotQuery()
-      .where("channel_id", channelId)
-      .firstOrFail();
-
+    const userChannelPivot = await this.getNumberOfKicks(channelId, userId);
     const currentKicks = userChannelPivot["kicks"] || 0; // Get current kicks or default to 0
     await (
       await User.findOrFail(userId)
@@ -122,12 +127,11 @@ class ChannelUsersService {
       .where("channel_id", channelId)
       .where("user_channel_status", UserChannelStatus.InChannel)
       .first();
-    console.log("exists:", exists);
     return exists;
   }
 
   // Kick user from channel
-  private async kickUser(channelId: number, userId: number): Promise<void> {
+  public async kickUser(channelId: number, userId: number): Promise<void> {
     await this.changeUserStatus(channelId, userId, UserChannelStatus.KickedOut);
   }
 
