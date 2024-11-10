@@ -67,7 +67,6 @@ class ChannelUsersService {
       UserChannelStatus.LeftChannel,
     );
     Event.emit("user:leftChannel", {
-      userId: userId,
       channelId: channelId,
       isAdmin: await this.isAdmin(userId, channelId),
     });

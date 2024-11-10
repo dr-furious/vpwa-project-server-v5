@@ -3,15 +3,15 @@ import ChannelUsersService from "App/Services/ChannelUsersService";
 import ChannelService from "App/Services/ChannelService";
 
 export default class ChannelUser {
-  public async onNewUser(data: EventsList[]) {
-    // do something
-  }
+  // public async onNewUser(data: EventsList[]) {
+  //   // do something
+  // }
 
   public async onUserLeftChannel(
     data: EventsList["user:leftChannel"],
   ): Promise<void> {
     // If user was admin we should delete the channel
-    const { userId, channelId, isAdmin } = data;
+    const { channelId, isAdmin } = data;
 
     if (!isAdmin) {
       return;
