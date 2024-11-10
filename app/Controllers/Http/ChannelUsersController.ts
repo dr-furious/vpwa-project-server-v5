@@ -18,7 +18,7 @@ export default class ChannelUsersController {
       }
 
       await ChannelUsersService.leaveChannel(userId, channelId);
-      return response.status(200).json({ error: "Left was seccessful" });
+      return response.status(200).json({ message: "Left was seccessful" });
     } else if (user_channel_status == "kicked_out") {
       if (auth.user!.id === userId) {
         return response.status(403).json({ message: "Cannot kick yourself" });

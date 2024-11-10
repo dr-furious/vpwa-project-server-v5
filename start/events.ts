@@ -23,3 +23,4 @@ Event.on("new:user", (user) => {
 });
 
 Event.on("user:kicksIncreased", "ChannelUser.onKicksIncreased");
+Event.on("user:leftChannel", "ChannelUser.onUserLeftChannel");
