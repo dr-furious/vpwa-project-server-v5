@@ -35,4 +35,5 @@ Route.group(() => {
   Route.patch("channels/users/status", "ChannelUsersController.updateStatus");
   Route.post("channels/join", "ChannelsController.create"); // to join / create a channel
   Route.post("channels/invite", "ChannelUsersController.create"); // to join / create a channel
+  Route.post("channels/invite/resolve", "ChannelUsersController.resolveInvite"); // to join / create a channel
 }).middleware("auth");

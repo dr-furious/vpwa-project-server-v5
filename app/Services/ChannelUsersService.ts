@@ -25,6 +25,7 @@ class ChannelUsersService {
    * PUBLIC METHODS
    */
 
+  // Handles user joing channel
   public async handleJoin(user: User, channel: Channel): Promise<void> {
     // Can join only channel he is not in
     if (await this.isInChannel(user, channel)) {
@@ -61,13 +62,13 @@ class ChannelUsersService {
     );
   }
 
+  // Joins user to channel
   public async join(
     user: User,
     channel: Channel,
     userRole: UserRole,
     userChannelStatus: UserChannelStatus,
   ): Promise<void> {
-    //
     await user.related("channels").attach({
       [channel.id]: {
         user_role: userRole,
@@ -76,17 +77,90 @@ class ChannelUsersService {
     });
   }
 
-  public async invite(
-    inviterId: number,
-    userId: number,
-    channelId: number,
+  // Handles invitation to a channel
+  public async handleInvite(
+    inviter: User,
+    user: User,
+    channel: Channel,
   ): Promise<void> {
-    // User cannot belong to the channel to be invited
     // Inviter must belong to the channel he invites to
+    if (!(await this.isInChannel(inviter, channel))) {
+      throw new Exception(
+        "You must belong to the channel in order to invite others.",
+        403,
+      );
+    }
+
     // User cannot be invited to private channel by regular member
+    if (
+      (await ChannelService.isPrivate(channel)) &&
+      !(await this.isAdmin(inviter, channel))
+    ) {
+      throw new Exception(
+        "Only admin can invite others to a private channel.",
+        403,
+      );
+    }
+
+    // User cannot belong to the channel to be invited
+    if (await this.isInChannel(user, channel)) {
+      throw new Exception(
+        "This user is already a member of this channel.",
+        403,
+      );
+    }
+
+    const userChannelStatus = await this.getUserChannelStatus(user, channel);
     // If user was kicked from the channel, only admin can invite him back
+    if (
+      userChannelStatus === UserChannelStatus.KickedOut &&
+      !(await this.isAdmin(inviter, channel))
+    ) {
+      throw new Exception(
+        "This user was kicked out of this channel and only admin can invite him back.",
+        403,
+      );
+    }
+
+    // If user was already invited
+    if (userChannelStatus === UserChannelStatus.PendingInvite) {
+      throw new Exception(
+        "This user was already invited to this channel.",
+        403,
+      );
+    }
+
+    // Invite user to the channel
+    this.invite(user, channel);
   }
 
+  public async acceptInvite(user, channel: Channel): Promise<void> {
+    // If user is not invited
+    if (
+      (await this.getUserChannelStatus(user, channel)) !==
+      UserChannelStatus.PendingInvite
+    ) {
+      throw new Exception("You were not invited to this channel", 403);
+    }
+
+    // Accept invitation
+    await this.changeUserStatus(channel, user, UserChannelStatus.InChannel);
+  }
+
+  public async declineInvite(user: User, channel: Channel): Promise<void> {
+    // If user is not invited
+    if (
+      (await this.getUserChannelStatus(user, channel)) !==
+      UserChannelStatus.PendingInvite
+    ) {
+      throw new Exception("You were not invited to this channel", 403);
+    }
+
+    // Decline invitation
+    await user.related("channels").detach([channel!.id]);
+  }
+
+  // Handles kick from a channel
   public async handleKick(
     kicker: User,
     user: User,
@@ -166,6 +240,25 @@ class ChannelUsersService {
    *
    * PRIVATE METHODS
    */
+
+  // Invite user to channel
+  private async invite(user: User, channel: Channel): Promise<void> {
+    if (await this.isInChannel(user, channel)) {
+      await this.changeUserStatus(
+        channel,
+        user,
+        UserChannelStatus.PendingInvite,
+      );
+      return;
+    }
+
+    await user.related("channels").attach({
+      [channel.id]: {
+        user_role: UserRole.Member,
+        user_channel_status: UserChannelStatus.PendingInvite,
+      },
+    });
+  }
 
   // Update number of kicks
   private async updateKickCount(channel: Channel, user: User): Promise<void> {
