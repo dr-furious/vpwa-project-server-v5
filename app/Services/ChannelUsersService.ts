@@ -3,13 +3,14 @@ import User from "App/Models/User";
 import Event from "@ioc:Adonis/Core/Event";
 import { Exception } from "@adonisjs/core/build/standalone";
 import ChannelService from "./ChannelService";
+import Channel, { ChannelType } from "App/Models/Channel";
 
-enum UserRole {
+export enum UserRole {
   Admin = "admin",
   Member = "member",
 }
 
-enum UserChannelStatus {
+export enum UserChannelStatus {
   PendingInvite = "pending_invite",
   InChannel = "in_channel",
   LeftChannel = "left_channel",
@@ -24,11 +25,62 @@ class ChannelUsersService {
    * PUBLIC METHODS
    */
 
-  public async join(userId: number, channelId: number): Promise<void> {
+  public async handleJoin(user: User, channel: Channel): Promise<void> {
     // Can join only channel he is not in
+    if (await this.isInChannel(user.id, channel.id)) {
+      throw new Exception(
+        "Cannot join a channel you are already member of.",
+        403,
+      );
+    }
+
     // Can join only public channel
+    if (channel.type === ChannelType.Private) {
+      throw new Exception("Cannot join a private channel.", 403);
+    }
+
+    const userChannelStatus = await this.getUserChannelStatus(
+      user.id,
+      channel.id,
+    );
     // Can join only if was not kicked before
-    // if channel does not exist create it and become admin
+    if (userChannelStatus === UserChannelStatus.KickedOut) {
+      throw new Exception("Cannot join a channel you were kicked out of.", 403);
+    }
+
+    // If user left channel before, join him back in
+    if (userChannelStatus === UserChannelStatus.LeftChannel) {
+      await this.changeUserStatus(
+        channel.id,
+        user.id,
+        UserChannelStatus.InChannel,
+      );
+
+      return;
+    }
+
+    // Join the channel
+    await this.join(
+      user,
+      channel,
+      UserRole.Member,
+      UserChannelStatus.InChannel,
+    );
+  }
+
+  public async join(
+    user: User,
+    channel: Channel,
+    userRole: UserRole,
+    userChannelStatus: UserChannelStatus,
+  ): Promise<void> {
+    //
+    await user.related("channels").attach({
+      [channel.id]: {
+        user_role: userRole,
+        user_channel_status: userChannelStatus,
+      },
+    });
   }
 
   public async invite(
@@ -186,15 +238,16 @@ class ChannelUsersService {
       .update("user_channel_status", newStatus);
   }
 
-  private async getUserStatus(
+  private async getUserChannelStatus(
     userId: number,
     channelId: number,
   ): Promise<UserChannelStatus> {
-    return await (await User.findOrFail(userId))
+    const record = await (await User.findOrFail(userId))
       .related("channels")
       .pivotQuery()
       .where("channel_id", channelId)
-      .first()["user_channel_status"];
+      .first();
+    return record["user_channel_status"];
   }
 }
 
