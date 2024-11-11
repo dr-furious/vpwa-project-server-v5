@@ -6,6 +6,7 @@ import ChannelUsersService, {
 } from "App/Services/ChannelUsersService";
 import ChannelService from "App/Services/ChannelService";
 import CreateChannelValidator from "App/Validators/CreateChannelValidator";
+import CreateChannelUserValidator from "App/Validators/CreateChannelUserValidator";
 
 export default class ChannelUsersController {
   // Directly destructuring the http context (passed automatically to each controller by adonis)
@@ -35,28 +36,6 @@ export default class ChannelUsersController {
   }
 
   async create({ auth, params, request, response }: HttpContextContract) {
-    const data = await request.validate(CreateChannelValidator);
-    const channelName = data.channelName;
-    const channelType = data.channelType;
-
-    const channel = await ChannelService.exists(undefined, channelName);
-    if (channel) {
-      // handle join
-      return await ChannelUsersService.handleJoin(auth.user!, channel);
-    } else {
-      // handle create
-      const newChannel = await ChannelService.createChannel(
-        channelName,
-        channelType,
-        auth.user!.id,
-      );
-      await ChannelUsersService.join(
-        auth.user!,
-        newChannel,
-        UserRole.Admin,
-        UserChannelStatus.InChannel,
-      );
-      return newChannel;
-    }
+    const data = await request.validate(CreateChannelUserValidator);
   }
 }

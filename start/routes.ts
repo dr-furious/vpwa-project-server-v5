@@ -36,5 +36,6 @@ Route.group(() => {
     "channels/:channel_id/users/:user_id/status",
     "ChannelUsersController.updateStatus",
   );
-  Route.post("channels/join", "ChannelUsersController.create");
+  Route.post("channels/join", "ChannelController.create"); // to join / create a channel
+  Route.post("channels/:channel_id/invite", "ChannelUsersController.create"); // to join / create a channel
 }).middleware("auth");
