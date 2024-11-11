@@ -27,7 +27,7 @@ class ChannelUsersService {
 
   public async handleJoin(user: User, channel: Channel): Promise<void> {
     // Can join only channel he is not in
-    if (await this.isInChannel(user.id, channel.id)) {
+    if (await this.isInChannel(user, channel)) {
       throw new Exception(
         "Cannot join a channel you are already member of.",
         403,
@@ -39,10 +39,7 @@ class ChannelUsersService {
       throw new Exception("Cannot join a private channel.", 403);
     }
 
-    const userChannelStatus = await this.getUserChannelStatus(
-      user.id,
-      channel.id,
-    );
+    const userChannelStatus = await this.getUserChannelStatus(user, channel);
     // Can join only if was not kicked before
     if (userChannelStatus === UserChannelStatus.KickedOut) {
       throw new Exception("Cannot join a channel you were kicked out of.", 403);
@@ -50,11 +47,7 @@ class ChannelUsersService {
 
     // If user left channel before, join him back in
     if (userChannelStatus === UserChannelStatus.LeftChannel) {
-      await this.changeUserStatus(
-        channel.id,
-        user.id,
-        UserChannelStatus.InChannel,
-      );
+      await this.changeUserStatus(channel, user, UserChannelStatus.InChannel);
 
       return;
     }
@@ -95,14 +88,14 @@ class ChannelUsersService {
   }
 
   public async handleKick(
-    kickerId: number,
-    userId: number,
-    channelId: number,
+    kicker: User,
+    user: User,
+    channel: Channel,
   ): Promise<void> {
     // In private channels only admin can kick
     if (
-      (await ChannelService.isPrivate(channelId)) &&
-      !(await this.isAdmin(kickerId, channelId))
+      (await ChannelService.isPrivate(channel)) &&
+      !(await this.isAdmin(kicker, channel))
     ) {
       throw new Exception(
         "Only admin can kick out users in private channel.",
@@ -110,7 +103,7 @@ class ChannelUsersService {
       );
     }
 
-    if (!(await this.isInChannel(kickerId, channelId))) {
+    if (!(await this.isInChannel(kicker, channel))) {
       // User must be part of the channel to be able to kick another user
       throw new Exception(
         "Cannot kick a user from channel you are not member of",
@@ -119,7 +112,7 @@ class ChannelUsersService {
     }
 
     // User must be part of the channel so he can be kicked
-    if (!(await this.isInChannel(userId, channelId))) {
+    if (!(await this.isInChannel(user, channel))) {
       throw new Exception(
         "Cannot kick a user from channel he does not belong to",
         403,
@@ -127,52 +120,46 @@ class ChannelUsersService {
     }
 
     // Admin cannot be kicked
-    if (await this.isAdmin(userId, channelId)) {
+    if (await this.isAdmin(user, channel)) {
       throw new Exception("Cannot kick admin", 403);
     }
 
     // If admin is kicking someone, kick immediatelly
-    if (await this.isAdmin(kickerId, channelId)) {
-      await this.kickUser(channelId, userId);
+    if (await this.isAdmin(kicker, channel)) {
+      await this.kickUser(channel, user);
       return;
     }
 
     // If member is kicking someone, increase kick count
-    await this.updateKickCount(userId, channelId);
+    await this.updateKickCount(channel, user);
   }
 
   // Leave channel
-  public async leaveChannel(userId: number, channelId: number): Promise<void> {
+  public async leaveChannel(user: User, channel: Channel): Promise<void> {
     // User must be part of the channel so he can leave
-    if (!(await this.isInChannel(userId, channelId))) {
+    if (!(await this.isInChannel(user, channel))) {
       throw new Exception("Cannot leave a channel you do not belong to", 403);
     }
 
-    await this.changeUserStatus(
-      channelId,
-      userId,
-      UserChannelStatus.LeftChannel,
-    );
+    await this.changeUserStatus(channel, user, UserChannelStatus.LeftChannel);
     Event.emit("user:leftChannel", {
-      channelId: channelId,
-      isAdmin: await this.isAdmin(userId, channelId),
+      channel: channel,
+      isAdmin: await this.isAdmin(user, channel),
     });
   }
 
-  public async getNumberOfKicks(
-    channelId: number,
-    userId: number,
-  ): Promise<number> {
-    return await (await User.findOrFail(userId))
+  // Get the number of kicks for user in channel
+  public async getNumberOfKicks(channel: Channel, user: User): Promise<number> {
+    return await user
       .related("channels")
       .pivotQuery()
-      .where("channel_id", channelId)
+      .where("channel_id", channel.id)
       .firstOrFail();
   }
 
   // Kick user from channel
-  public async kickUser(channelId: number, userId: number): Promise<void> {
-    await this.changeUserStatus(channelId, userId, UserChannelStatus.KickedOut);
+  public async kickUser(channel: Channel, user: User): Promise<void> {
+    await this.changeUserStatus(channel, user, UserChannelStatus.KickedOut);
   }
 
   /**
@@ -181,31 +168,29 @@ class ChannelUsersService {
    */
 
   // Update number of kicks
-  private async updateKickCount(
-    channelId: number,
-    userId: number,
-  ): Promise<void> {
-    const userChannelPivot = await this.getNumberOfKicks(channelId, userId);
+  private async updateKickCount(channel: Channel, user: User): Promise<void> {
+    const userChannelPivot = await this.getNumberOfKicks(channel, user);
     const currentKicks = userChannelPivot["kicks"] || 0; // Get current kicks or default to 0
-    await (
-      await User.findOrFail(userId)
-    )
+    await user
       .related("channels")
       .pivotQuery()
-      .where("channel_id", channelId)
+      .where("channel_id", channel.id)
       .update("kicks", currentKicks + 1); // Increment kicks by 1
 
     // Emit event
-    Event.emit("user:kicksIncreased", { userId: userId, channelId: channelId });
+    Event.emit("user:kicksIncreased", {
+      user: user,
+      channel: channel,
+    });
   }
 
   // Checks if user is admin in channel - help by ChatGPT to construct the correct query
-  private async isAdmin(userId: number, channelId: number): Promise<boolean> {
+  private async isAdmin(user: User, channel: Channel): Promise<boolean> {
     const userRole = await User.query()
-      .where("id", userId)
+      .where("id", user.id)
       .whereHas("channels", (channelQuery) => {
         channelQuery
-          .where("channel_id", channelId)
+          .where("channel_id", channel.id)
           .wherePivot("user_role", UserRole.Admin);
       })
       .first();
@@ -213,39 +198,39 @@ class ChannelUsersService {
     return !!userRole;
   }
 
-  private async isInChannel(
-    userId: number,
-    channelId: number,
-  ): Promise<boolean> {
-    const exists = await (await User.find(userId))
+  // Checks if user is in channel
+  private async isInChannel(user: User, channel: Channel): Promise<boolean> {
+    const exists = await user
       ?.related("channels")
       .pivotQuery()
-      .where("channel_id", channelId)
+      .where("channel_id", channel.id)
       .andWhere("user_channel_status", UserChannelStatus.InChannel)
       .first();
     return !!exists;
   }
 
+  // Changes user status in channel
   private async changeUserStatus(
-    channelId: number,
-    userId: number,
+    channel: Channel,
+    user: User,
     newStatus: UserChannelStatus,
   ): Promise<void> {
-    await (await User.findOrFail(userId))
+    await user
       .related("channels")
       .pivotQuery()
-      .where("channel_id", channelId)
+      .where("channel_id", channel.id)
       .update("user_channel_status", newStatus);
   }
 
+  // Gets user status in channel or return null if user is not in channel
   private async getUserChannelStatus(
-    userId: number,
-    channelId: number,
+    user: User,
+    channel: Channel,
   ): Promise<UserChannelStatus | null> {
-    const record = await (await User.findOrFail(userId))
+    const record = await user
       .related("channels")
       .pivotQuery()
-      .where("channel_id", channelId)
+      .where("channel_id", channel.id)
       .first();
     if (record) {
       return record["user_channel_status"];

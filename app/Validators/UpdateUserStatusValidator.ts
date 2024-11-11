@@ -1,4 +1,4 @@
-import { schema, CustomMessages } from "@ioc:Adonis/Core/Validator";
+import { schema, CustomMessages, rules } from "@ioc:Adonis/Core/Validator";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import { UserChannelStatus } from "App/Services/ChannelUsersService";
 
@@ -25,6 +25,14 @@ export default class UpdateUserStatusValidator {
    *    ```
    */
   public schema = schema.create({
+    channelName: schema.string({}, [
+      rules.minLength(3),
+      rules.exists({ table: "channels", column: "name" }),
+    ]),
+    nickName: schema.string({}, [
+      rules.minLength(3),
+      rules.exists({ table: "users", column: "nick_name" }),
+    ]),
     userChannelStatus: schema.enum(Object.values(UserChannelStatus)),
   });
 
