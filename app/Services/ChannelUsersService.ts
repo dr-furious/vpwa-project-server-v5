@@ -2,6 +2,7 @@
 import User from "App/Models/User";
 import Event from "@ioc:Adonis/Core/Event";
 import { Exception } from "@adonisjs/core/build/standalone";
+import ChannelService from "./ChannelService";
 
 enum UserRole {
   Admin = "admin",
@@ -18,13 +19,47 @@ enum UserChannelStatus {
 class ChannelUsersService {
   // service methods
 
+  /**
+   *
+   * PUBLIC METHODS
+   */
+
+  public async join(userId: number, channelId: number): Promise<void> {
+    // Can join only channel he is not in
+    // Can join only public channel
+    // Can join only if was not kicked before
+    // if channel does not exist create it and become admin
+  }
+
+  public async invite(
+    inviterId: number,
+    userId: number,
+    channelId: number,
+  ): Promise<void> {
+    // User cannot belong to the channel to be invited
+    // Inviter must belong to the channel he invites to
+    // User cannot be invited to private channel by regular member
+    // If user was kicked from the channel, only admin can invite him back
+  }
+
   public async handleKick(
     kickerId: number,
     userId: number,
     channelId: number,
   ): Promise<void> {
-    // User must be part of the channel to be able to kick another user
+    // In private channels only admin can kick
+    if (
+      (await ChannelService.isPrivate(channelId)) &&
+      !(await this.isAdmin(kickerId, channelId))
+    ) {
+      throw new Exception(
+        "Only admin can kick out users in private channel.",
+        403,
+      );
+    }
+
     if (!(await this.isInChannel(kickerId, channelId))) {
+      // User must be part of the channel to be able to kick another user
       throw new Exception(
         "Cannot kick a user from channel you are not member of",
         403,
@@ -45,7 +80,7 @@ class ChannelUsersService {
     }
 
     // If admin is kicking someone, kick immediatelly
-    if (await this.isAdmin(userId, channelId)) {
+    if (await this.isAdmin(kickerId, channelId)) {
       this.kickUser(channelId, userId);
       return;
     }
@@ -82,6 +117,16 @@ class ChannelUsersService {
       .where("channel_id", channelId)
       .firstOrFail();
   }
+
+  // Kick user from channel
+  public async kickUser(channelId: number, userId: number): Promise<void> {
+    await this.changeUserStatus(channelId, userId, UserChannelStatus.KickedOut);
+  }
+
+  /**
+   *
+   * PRIVATE METHODS
+   */
 
   // Update number of kicks
   private async updateKickCount(
@@ -124,14 +169,9 @@ class ChannelUsersService {
       ?.related("channels")
       .pivotQuery()
       .where("channel_id", channelId)
-      .where("user_channel_status", UserChannelStatus.InChannel)
+      .andWhere("user_channel_status", UserChannelStatus.InChannel)
       .first();
     return exists;
-  }
-
-  // Kick user from channel
-  public async kickUser(channelId: number, userId: number): Promise<void> {
-    await this.changeUserStatus(channelId, userId, UserChannelStatus.KickedOut);
   }
 
   private async changeUserStatus(
@@ -144,6 +184,17 @@ class ChannelUsersService {
       .pivotQuery()
       .where("channel_id", channelId)
       .update("user_channel_status", newStatus);
+  }
+
+  private async getUserStatus(
+    userId: number,
+    channelId: number,
+  ): Promise<UserChannelStatus> {
+    return await (await User.findOrFail(userId))
+      .related("channels")
+      .pivotQuery()
+      .where("channel_id", channelId)
+      .first()["user_channel_status"];
   }
 }
 
