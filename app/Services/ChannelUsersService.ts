@@ -133,12 +133,12 @@ class ChannelUsersService {
 
     // If admin is kicking someone, kick immediatelly
     if (await this.isAdmin(kickerId, channelId)) {
-      this.kickUser(channelId, userId);
+      await this.kickUser(channelId, userId);
       return;
     }
 
     // If member is kicking someone, increase kick count
-    this.updateKickCount(userId, channelId);
+    await this.updateKickCount(userId, channelId);
   }
 
   // Leave channel
@@ -223,7 +223,7 @@ class ChannelUsersService {
       .where("channel_id", channelId)
       .andWhere("user_channel_status", UserChannelStatus.InChannel)
       .first();
-    return exists;
+    return !!exists;
   }
 
   private async changeUserStatus(
@@ -241,13 +241,16 @@ class ChannelUsersService {
   private async getUserChannelStatus(
     userId: number,
     channelId: number,
-  ): Promise<UserChannelStatus> {
+  ): Promise<UserChannelStatus | null> {
     const record = await (await User.findOrFail(userId))
       .related("channels")
       .pivotQuery()
       .where("channel_id", channelId)
       .first();
-    return record["user_channel_status"];
+    if (record) {
+      return record["user_channel_status"];
+    }
+    return null;
   }
 }
 
