@@ -7,7 +7,7 @@ import ChannelService from "App/Services/ChannelService";
 import CreateChannelValidator from "App/Validators/CreateChannelValidator";
 
 export default class ChannelsController {
-  async create({ auth, request }: HttpContextContract) {
+  async create({ auth, request, response }: HttpContextContract) {
     const data = await request.validate(CreateChannelValidator);
     const channelName = data.channelName;
     const channelType = data.channelType;
@@ -15,7 +15,8 @@ export default class ChannelsController {
     const channel = await ChannelService.exists(undefined, channelName);
     if (channel) {
       // handle join
-      return await ChannelUsersService.handleJoin(auth.user!, channel);
+      await ChannelUsersService.handleJoin(auth.user!, channel);
+      return response.status(200).json({ message: "Join was successful" });
     } else {
       // handle create
       const newChannel = await ChannelService.createChannel(
@@ -29,7 +30,9 @@ export default class ChannelsController {
         UserRole.Admin,
         UserChannelStatus.InChannel,
       );
-      return newChannel;
+      return response
+        .status(201)
+        .json({ message: "Channel was successfully created." });
     }
   }
 }
