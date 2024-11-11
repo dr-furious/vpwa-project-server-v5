@@ -5,6 +5,9 @@
  * file.
  */
 
+import Channel from "App/Models/Channel";
+import User from "App/Models/User";
+
 declare module "@ioc:Adonis/Core/Event" {
   /*
   |--------------------------------------------------------------------------
@@ -26,9 +29,9 @@ declare module "@ioc:Adonis/Core/Event" {
   |
   */
   interface EventsList {
-    "user:kicksIncreased": { userId: number; channelId: number };
+    "user:kicksIncreased": { user: User; channel: Channel };
     "user:leftChannel": {
-      channelId: number;
+      channel: Channel;
       isAdmin: boolean;
     };
   }

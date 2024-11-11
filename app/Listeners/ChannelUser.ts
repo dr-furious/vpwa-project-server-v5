@@ -11,27 +11,24 @@ export default class ChannelUser {
     data: EventsList["user:leftChannel"],
   ): Promise<void> {
     // If user was admin we should delete the channel
-    const { channelId, isAdmin } = data;
+    const { channel, isAdmin } = data;
 
     if (!isAdmin) {
       return;
     }
 
-    await ChannelService.deleteChannel(channelId);
+    await ChannelService.deleteChannel(channel);
   }
 
   public async onKicksIncreased(
     data: EventsList["user:kicksIncreased"],
   ): Promise<void> {
-    const { userId, channelId } = data;
+    const { user, channel } = data;
     // Check the number of kicks
-    const result = await ChannelUsersService.getNumberOfKicks(
-      channelId,
-      userId,
-    );
+    const result = await ChannelUsersService.getNumberOfKicks(channel, user);
     // Hardcode (3) for now :( - and kick user
     if (result["kicks"] >= 3) {
-      await ChannelUsersService.kickUser(channelId, userId);
+      await ChannelUsersService.kickUser(channel, user);
     }
   }
 }

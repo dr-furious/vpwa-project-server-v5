@@ -26,11 +26,11 @@ export default class CreateChannelUserValidator {
   public schema = schema.create({
     channelName: schema.string({}, [
       rules.minLength(3),
-      rules.unique({ table: "channels", column: "name" }),
+      rules.exists({ table: "channels", column: "name" }),
     ]),
     nickName: schema.string({}, [
       rules.minLength(3),
-      rules.unique({ table: "users", column: "nick_name" }),
+      rules.exists({ table: "users", column: "nick_name" }),
     ]),
   });
 

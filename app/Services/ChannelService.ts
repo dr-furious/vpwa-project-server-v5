@@ -20,12 +20,11 @@ class ChannelService {
   }
 
   // Delete channel
-  public async deleteChannel(channelId: number): Promise<void> {
-    await (await Channel.findOrFail(channelId)).delete();
+  public async deleteChannel(channel: Channel): Promise<void> {
+    await channel.delete();
   }
 
-  public async isPrivate(channelId: number): Promise<boolean> {
-    const channel = await Channel.findOrFail(channelId);
+  public async isPrivate(channel: Channel): Promise<boolean> {
     return channel.type === ChannelType.Private;
   }
 

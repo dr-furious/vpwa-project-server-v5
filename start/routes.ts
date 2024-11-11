@@ -32,10 +32,7 @@ Route.group(() => {
 }).prefix("auth");
 
 Route.group(() => {
-  Route.patch(
-    "channels/:channel_id/users/:user_id/status",
-    "ChannelUsersController.updateStatus",
-  );
+  Route.patch("channels/users/status", "ChannelUsersController.updateStatus");
   Route.post("channels/join", "ChannelsController.create"); // to join / create a channel
-  Route.post("channels/:channel_id/invite", "ChannelUsersController.create"); // to join / create a channel
+  Route.post("channels/invite", "ChannelUsersController.create"); // to join / create a channel
 }).middleware("auth");
