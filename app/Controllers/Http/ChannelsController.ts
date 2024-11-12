@@ -5,6 +5,9 @@ import ChannelUsersService, {
 } from "App/Services/ChannelUsersService";
 import ChannelService from "App/Services/ChannelService";
 import CreateChannelValidator from "App/Validators/CreateChannelValidator";
+import RetrieveChannelUsersValidator from "App/Validators/RetrieveChannelUsersValidator";
+import Channel from "App/Models/Channel";
+import User from "App/Models/User";
 
 export default class ChannelsController {
   async create({ auth, request, response }: HttpContextContract) {
@@ -34,5 +37,23 @@ export default class ChannelsController {
         .status(201)
         .json({ message: "Channel was successfully created." });
     }
+  }
+
+  async getUsers({ request, response }: HttpContextContract) {
+    //
+    const data = await request.validate(RetrieveChannelUsersValidator);
+
+    const channelName = data.channelName;
+    const channel = await Channel.findBy("name", channelName);
+
+    // Retrieve users in the specified channel with status "InChannel" - following query was constructed with help of ChatGPT
+    const channelUsers = await User.query().whereHas("channels", (query) => {
+      query
+        .where("channel_id", channel!.id)
+        .wherePivot("user_channel_status", UserChannelStatus.InChannel);
+    });
+
+    // Return the users in the response
+    return response.status(200).json({ users: channelUsers });
   }
 }
