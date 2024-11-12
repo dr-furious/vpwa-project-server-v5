@@ -236,6 +236,17 @@ class ChannelUsersService {
     await this.changeUserStatus(channel, user, UserChannelStatus.KickedOut);
   }
 
+  // Checks if user is in channel
+  public async isInChannel(user: User, channel: Channel): Promise<boolean> {
+    const exists = await user
+      ?.related("channels")
+      .pivotQuery()
+      .where("channel_id", channel.id)
+      .andWhere("user_channel_status", UserChannelStatus.InChannel)
+      .first();
+    return !!exists;
+  }
+
   /**
    *
    * PRIVATE METHODS
@@ -289,17 +300,6 @@ class ChannelUsersService {
       .first();
 
     return !!userRole;
-  }
-
-  // Checks if user is in channel
-  private async isInChannel(user: User, channel: Channel): Promise<boolean> {
-    const exists = await user
-      ?.related("channels")
-      .pivotQuery()
-      .where("channel_id", channel.id)
-      .andWhere("user_channel_status", UserChannelStatus.InChannel)
-      .first();
-    return !!exists;
   }
 
   // Changes user status in channel
