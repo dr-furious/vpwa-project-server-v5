@@ -48,15 +48,15 @@ export default class ChannelsController {
     const channel = await Channel.findBy("name", channelName);
 
     // if user is not from this channel, dont allow it
-    if (
-      !(await ChannelUsersService.isInChannel(
-        auth.user!,
-        channel!,
-        UserChannelStatus.InChannel,
-      ))
-    ) {
-      throw new Exception("Logged user is not from this channel.", 403);
-    }
+    // if (
+    //   !(await ChannelUsersService.isInChannel(
+    //     auth.user!,
+    //     channel!,
+    //     UserChannelStatus.InChannel,
+    //   ))
+    // ) {
+    //   throw new Exception("Logged user is not from this channel.", 403);
+    // }
     // Retrieve users in the specified channel with status "InChannel" - following query was constructed with help of ChatGPT
     const channelUsers = await User.query().whereHas("channels", (query) => {
       query
@@ -66,5 +66,15 @@ export default class ChannelsController {
 
     // Return the users in the response
     return response.status(200).json({ users: channelUsers });
+  }
+
+  async getPendingChannels({ auth, response }: HttpContextContract) {
+    const pendingChannels = await Channel.query().whereHas("users", (query) => {
+      query
+        .where("user_id", auth.user!.id)
+        .wherePivot("user_channel_status", UserChannelStatus.PendingInvite);
+    });
+
+    return response.status(200).json({ channels: pendingChannels });
   }
 }

@@ -60,6 +60,11 @@ export default class User extends BaseModel {
   })
   public sentMessages: HasMany<typeof Message>;
 
+  @hasMany(() => Message, {
+    foreignKey: "id",
+  })
+  public mentions: HasMany<typeof Message>;
+
   @manyToMany(() => Channel, {
     pivotTable: "channel_users",
     pivotForeignKey: "user_id",

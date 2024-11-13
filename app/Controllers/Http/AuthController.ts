@@ -29,7 +29,9 @@ export default class AuthController {
   }
 
   async me({ auth }: HttpContextContract) {
-    await auth.user!.load("channels");
+    await auth.user!.load("channels", (query) => {
+      query.wherePivot("user_channel_status", "in_channel");
+    });
     return auth.user;
   }
 }

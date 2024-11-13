@@ -19,13 +19,15 @@ export default class MessageRepository implements MessageRepositoryContract {
   public async create(
     channelName: string,
     userId: number,
-    content: string
+    content: string,
+    mentions: number
   ): Promise<SerializedMessage> {
     const channel = await Channel.findByOrFail("name", channelName);
+    const mentioned = mentions === 0 ? undefined : mentions;
     const message = await channel
       .related("messages")
-      .create({ createdBy: userId, content });
-    await message.load("author");
+      .create({ createdBy: userId, content, mentions: mentioned });
+    await message.load("author"); 
 
     return message.serialize() as SerializedMessage;
   }
