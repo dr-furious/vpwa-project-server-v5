@@ -2,6 +2,7 @@ import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import User from "App/Models/User";
 import RegisterUserValidator from "App/Validators/RegisterUserValidator";
 import LoginUserValidator from "App/Validators/LoginUserValidator";
+import UpdateUserValidator from "App/Validators/UpdateUserValidator";
 
 export default class AuthController {
   async register({ request }: HttpContextContract) {
@@ -33,5 +34,18 @@ export default class AuthController {
       query.wherePivot("user_channel_status", "in_channel");
     });
     return auth.user;
+  }
+
+  async update({ auth, request }: HttpContextContract) {
+    console.table(request.body());
+    const data = await request.validate(UpdateUserValidator);
+    const user = auth.user!;
+    const updatedUser = {
+      ...user,
+      ...data,
+    };
+    user.merge(updatedUser as User);
+    await user.save();
+    return user;
   }
 }
