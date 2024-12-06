@@ -38,4 +38,20 @@ export default class ChannelController {
 
     throw new Exception("Invalid user status value", 400);
   }
+
+  async create(
+    { auth, socket, params }: WsContextContract,
+    nickName: string,
+    channelName: string,
+  ) {
+    const user = await User.findBy("nickName", nickName); // invited user
+    const inviter = await User.find(auth.user?.id); // who is trying to invite somebody
+    const channel = await Channel.findBy("name", channelName); // channel to invite to
+
+    await ChannelUsersService.handleInvite(inviter!, user!, channel!);
+
+    console.log("Broadcasting userInvited to namespace:", socket.nsp.name);
+    socket.broadcast.emit("userInvited", user?.nickName);
+    console.log("complete");
+  }
 }

@@ -35,9 +35,8 @@ Route.group(() => {
 Route.group(() => {
   Route.patch("channels/users/status", "ChannelUsersController.updateStatus");
   Route.post("channels/join", "ChannelsController.create"); // to join / create a channel
-  Route.post("channels/invite", "ChannelUsersController.create"); // to join / create a channel
   Route.post("channels/invite/resolve", "ChannelUsersController.resolveInvite"); // to accept / decline invitation
-  Route.get("channel/users", "ChannelsController.getUsers"); // to accept / decline invitation
-  Route.get("channels/pending", "ChannelsController.getPendingChannels"); // to accept / decline invitation
+  Route.get("channel/users", "ChannelsController.getUsers");
+  Route.get("channels/pending", "ChannelsController.getPendingChannels");
   Route.get("channels", "ChannelUsersController.getUserChannels");
 }).middleware("auth");

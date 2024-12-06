@@ -266,9 +266,10 @@ class ChannelUsersService {
 
   // Invite user to channel
   private async invite(user: User, channel: Channel): Promise<void> {
+    const userChannelStatus = await this.getUserChannelStatus(user, channel);
     if (
-      (await this.getUserChannelStatus(user, channel)) ===
-      UserChannelStatus.KickedOut
+      userChannelStatus === UserChannelStatus.KickedOut ||
+      userChannelStatus === UserChannelStatus.LeftChannel
     ) {
       await this.changeUserStatus(
         channel,
