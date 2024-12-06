@@ -14,6 +14,9 @@ export default class Message extends BaseModel {
   public channelId: number;
 
   @column()
+  public mentions: number;
+
+  @column()
   public content: string;
 
   @column.dateTime({ autoCreate: true })
@@ -31,4 +34,9 @@ export default class Message extends BaseModel {
     foreignKey: "channelId",
   })
   public channel: BelongsTo<typeof Channel>;
+
+  @belongsTo(() => User, {
+    foreignKey: "mentions",
+  })
+  public mention: BelongsTo<typeof User>;
 }

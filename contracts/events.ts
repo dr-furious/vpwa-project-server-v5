@@ -5,7 +5,10 @@
  * file.
  */
 
-declare module '@ioc:Adonis/Core/Event' {
+import Channel from "App/Models/Channel";
+import User from "App/Models/User";
+
+declare module "@ioc:Adonis/Core/Event" {
   /*
   |--------------------------------------------------------------------------
   | Define typed events
@@ -26,6 +29,10 @@ declare module '@ioc:Adonis/Core/Event' {
   |
   */
   interface EventsList {
-    //
+    "user:kicksIncreased": { user: User; channel: Channel };
+    "user:leftChannel": {
+      channel: Channel;
+      isAdmin: boolean;
+    };
   }
 }

@@ -18,8 +18,25 @@
 |
 */
 
-import Route from '@ioc:Adonis/Core/Route'
+import Route from "@ioc:Adonis/Core/Route";
 
-Route.get('/', async () => {
-  return { hello: 'world' }
-})
+Route.get("/", async () => {
+  return { hello: "world" };
+}).middleware("auth");
+
+Route.group(() => {
+  Route.post("register", "AuthController.register");
+  Route.post("login", "AuthController.login");
+  Route.post("logout", "AuthController.logout").middleware("auth");
+  Route.get("me", "AuthController.me").middleware("auth");
+  Route.post("update", "AuthController.update").middleware("auth");
+}).prefix("auth");
+
+Route.group(() => {
+  Route.patch("channels/users/status", "ChannelUsersController.updateStatus");
+  Route.post("channels/join", "ChannelsController.create"); // to join / create a channel
+  Route.post("channels/invite", "ChannelUsersController.create"); // to join / create a channel
+  Route.post("channels/invite/resolve", "ChannelUsersController.resolveInvite"); // to accept / decline invitation
+  Route.get("channel/users", "ChannelsController.getUsers"); // to accept / decline invitation
+  Route.get("channels/pending", "ChannelsController.getPendingChannels"); // to accept / decline invitation
+}).middleware("auth");

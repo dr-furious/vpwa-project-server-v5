@@ -18,12 +18,18 @@ export default class extends BaseSchema {
         .references("id")
         .inTable("channels")
         .onDelete("CASCADE");
+      table
+        .integer("mentions")
+        .unsigned()
+        .references("id")
+        .inTable("users")
+        .onDelete("CASCADE");
       table.text("content");
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
        */
-      table.timestamp("created_at", { useTz: true });
-      table.timestamp("updated_at", { useTz: true });
+      table.timestamp("created_at", { useTz: true }).notNullable();
+      table.timestamp("updated_at", { useTz: true }).notNullable();
     });
   }
 
