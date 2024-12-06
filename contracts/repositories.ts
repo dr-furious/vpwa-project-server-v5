@@ -20,6 +20,11 @@ declare module "@ioc:Repositories/MessageRepository" {
 
   export interface MessageRepositoryContract {
     getAll(channelName: string): Promise<SerializedMessage[]>;
+    loadMessageBatch(
+      channelName: string,
+      index: number,
+      count: number
+    ): Promise<SerializedMessage[]>;
     create(
       channelName: string,
       userId: number,
