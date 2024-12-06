@@ -39,4 +39,5 @@ Route.group(() => {
   Route.post("channels/invite/resolve", "ChannelUsersController.resolveInvite"); // to accept / decline invitation
   Route.get("channel/users", "ChannelsController.getUsers"); // to accept / decline invitation
   Route.get("channels/pending", "ChannelsController.getPendingChannels"); // to accept / decline invitation
+  Route.get("channels", "ChannelUsersController.getUserChannels");
 }).middleware("auth");
