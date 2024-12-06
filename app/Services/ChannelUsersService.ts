@@ -83,6 +83,7 @@ class ChannelUsersService {
     user: User,
     channel: Channel,
   ): Promise<void> {
+    //console.log("\n\nBeginning check\n");
     // Inviter must belong to the channel he invites to
     if (!(await this.isInChannel(inviter, channel))) {
       throw new Exception(
@@ -122,6 +123,8 @@ class ChannelUsersService {
       );
     }
 
+    //console.log("\n\nAfter check\n");
+
     // If user was already invited
     if (userChannelStatus === UserChannelStatus.PendingInvite) {
       throw new Exception(
@@ -134,7 +137,7 @@ class ChannelUsersService {
     this.invite(user, channel);
   }
 
-  public async acceptInvite(user, channel: Channel): Promise<void> {
+  public async acceptInvite(user: User, channel: Channel): Promise<void> {
     // If user is not invited
     if (
       (await this.getUserChannelStatus(user, channel)) !==
@@ -247,6 +250,15 @@ class ChannelUsersService {
     return !!exists;
   }
 
+  // Gets all channels for given user
+  public async getUserChannels(user: User): Promise<Channel[]> {
+    await user.load("channels", (query) => {
+      query.wherePivot("user_channel_status", "in_channel");
+    });
+
+    return user.channels;
+  }
+
   /**
    *
    * PRIVATE METHODS
@@ -254,7 +266,10 @@ class ChannelUsersService {
 
   // Invite user to channel
   private async invite(user: User, channel: Channel): Promise<void> {
-    if (await this.isInChannel(user, channel)) {
+    if (
+      (await this.getUserChannelStatus(user, channel)) ===
+      UserChannelStatus.KickedOut
+    ) {
       await this.changeUserStatus(
         channel,
         user,

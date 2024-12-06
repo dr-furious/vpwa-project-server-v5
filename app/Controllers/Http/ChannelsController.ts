@@ -8,7 +8,6 @@ import CreateChannelValidator from "App/Validators/CreateChannelValidator";
 import RetrieveChannelUsersValidator from "App/Validators/RetrieveChannelUsersValidator";
 import Channel from "App/Models/Channel";
 import User from "App/Models/User";
-import { Exception } from "@adonisjs/core/build/standalone";
 
 export default class ChannelsController {
   async create({ auth, request, response }: HttpContextContract) {
@@ -40,7 +39,7 @@ export default class ChannelsController {
     }
   }
 
-  async getUsers({ auth, request, response }: HttpContextContract) {
+  async getUsers({ request, response }: HttpContextContract) {
     //
     const data = await request.validate(RetrieveChannelUsersValidator);
 

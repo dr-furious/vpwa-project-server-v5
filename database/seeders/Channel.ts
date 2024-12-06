@@ -16,7 +16,7 @@ export default class ChannelSeeder extends BaseSeeder {
       {
         name: "Chill",
         type: ChannelType.Public,
-        createdBy: 2,
+        createdBy: 3,
         numberOfUsers: 4,
         numberOfMessages: 14,
       },
