@@ -29,5 +29,7 @@ Ws.namespace("channels/:name")
   .on("userIsTyping", "MessageController.userIsTyping")
   .on("updateUserChannelStatus", "ChannelUsersController.updateStatus");
 
-Ws.namespace("users").on("inviteUser", "ChannelUsersController.create");
-
+Ws.namespace("users")
+  .on("inviteUser", "ChannelUsersController.create")
+  .on("statusChangeReq", "UsersController.updateStatus")
+  .on("notificationsChangeReq", "UsersController.updateNottificationSettings");
