@@ -26,6 +26,8 @@ Ws.namespace("channels/:name")
   // .middleware('channel') // check if user can join given channel
   .on("loadMessages", "MessageController.loadMessages")
   .on("addMessage", "MessageController.addMessage")
+  .on("userIsTyping", "MessageController.userIsTyping")
   .on("updateUserChannelStatus", "ChannelUsersController.updateStatus");
 
 Ws.namespace("users").on("inviteUser", "ChannelUsersController.create");
+

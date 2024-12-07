@@ -12,8 +12,14 @@ import { inject } from "@adonisjs/core/build/standalone";
 export default class MessageController {
   constructor(private messageRepository: MessageRepositoryContract) {}
 
-  public async loadMessages({ params }: WsContextContract) {
-    return this.messageRepository.getAll(params.name);
+  public async loadMessages({ params }: WsContextContract, {index, count}) {
+    console.log("loadMessages", index, count);
+    // return this.messageRepository.getAll(params.name);
+    return this.messageRepository.loadMessageBatch(params.name, index, count);
+  }
+
+  public async userIsTyping({ params, socket }: WsContextContract, channel:string, username: string, message:string) {
+    socket.broadcast.emit("userTypingMessage", channel, username, message);
   }
 
   public async addMessage(
