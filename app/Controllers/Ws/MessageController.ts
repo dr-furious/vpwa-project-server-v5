@@ -13,8 +13,6 @@ export default class MessageController {
   constructor(private messageRepository: MessageRepositoryContract) {}
 
   public async loadMessages({ params }: WsContextContract, { index, count }) {
-    //console.log("loadMessages", index, count);
-    // return this.messageRepository.getAll(params.name);
     return this.messageRepository.loadMessageBatch(params.name, index, count);
   }
 
@@ -32,7 +30,6 @@ export default class MessageController {
     content: string,
     mentions: number,
   ) {
-    // console.log("addMessage", content, mentions);
     const message = await this.messageRepository.create(
       params.name,
       auth.user!.id,

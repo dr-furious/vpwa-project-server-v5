@@ -83,7 +83,6 @@ class ChannelUsersService {
     user: User,
     channel: Channel,
   ): Promise<void> {
-    //console.log("\n\nBeginning check\n");
     // Inviter must belong to the channel he invites to
     if (!(await this.isInChannel(inviter, channel))) {
       throw new Exception(
@@ -122,8 +121,6 @@ class ChannelUsersService {
         403,
       );
     }
-
-    //console.log("\n\nAfter check\n");
 
     // If user was already invited
     if (userChannelStatus === UserChannelStatus.PendingInvite) {

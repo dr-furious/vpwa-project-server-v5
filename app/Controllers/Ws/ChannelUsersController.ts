@@ -50,8 +50,6 @@ export default class ChannelController {
 
     await ChannelUsersService.handleInvite(inviter!, user!, channel!);
 
-    //console.log("Broadcasting userInvited to namespace:", socket.nsp.name);
     socket.broadcast.emit("userInvited", user?.nickName);
-    //console.log("complete");
   }
 }

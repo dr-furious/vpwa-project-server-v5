@@ -8,7 +8,6 @@ export default class ChannelController {
     newStatus: UserStatus,
   ) {
     const user = await User.findBy("nickName", nickName);
-    //console.log(user);
     if (user) {
       user.status = newStatus;
       await user.save();
@@ -25,7 +24,6 @@ export default class ChannelController {
     newSettings: UserNotificationSetting,
   ) {
     const user = await User.findBy("nickName", nickName);
-    //console.log(user);
     if (user) {
       user.notificationSetting = newSettings;
       await user.save();
