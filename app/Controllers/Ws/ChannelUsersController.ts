@@ -40,7 +40,7 @@ export default class ChannelController {
   }
 
   async create(
-    { auth, socket, params }: WsContextContract,
+    { auth, socket }: WsContextContract,
     nickName: string,
     channelName: string,
   ) {
@@ -50,8 +50,8 @@ export default class ChannelController {
 
     await ChannelUsersService.handleInvite(inviter!, user!, channel!);
 
-    console.log("Broadcasting userInvited to namespace:", socket.nsp.name);
+    //console.log("Broadcasting userInvited to namespace:", socket.nsp.name);
     socket.broadcast.emit("userInvited", user?.nickName);
-    console.log("complete");
+    //console.log("complete");
   }
 }
