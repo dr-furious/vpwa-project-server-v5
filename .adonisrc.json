@@ -16,6 +16,7 @@
   "preloads": [
     "./start/routes",
     "./start/kernel",
+    "./start/cron",
     {
       "file": "./start/wsKernel",
       "environment": ["web", "test"],
