@@ -16,7 +16,6 @@
   "preloads": [
     "./start/routes",
     "./start/kernel",
-    "./start/cron",
     {
       "file": "./start/wsKernel",
       "environment": ["web", "test"],
@@ -28,7 +27,8 @@
       "optional": true
     },
     "./start/events",
-    "./start/orm"
+    "./start/orm",
+    "./start/cron"
   ],
   "providers": [
     "./providers/AppProvider",

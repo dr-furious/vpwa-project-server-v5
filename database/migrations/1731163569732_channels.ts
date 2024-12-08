@@ -17,8 +17,6 @@ export default class extends BaseSchema {
         .enum("type", ["private", "public"])
         .notNullable()
         .defaultTo("public");
-      table.integer("number_of_users").notNullable().defaultTo(1);
-      table.integer("number_of_messages").notNullable().defaultTo(0);
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
        */
