@@ -1,5 +1,6 @@
 import BaseSeeder from "@ioc:Adonis/Lucid/Seeder";
 import Message from "App/Models/Message";
+import { DateTime } from "luxon";
 
 export default class extends BaseSeeder {
   public async run() {
@@ -130,6 +131,14 @@ export default class extends BaseSeeder {
         createdBy: 1,
         channelId: 2,
         content: "Another message here!",
+      },
+
+      // only message in channel that will cause that it will be deleted
+      {
+        createdBy: 1,
+        channelId: 6,
+        content: "Hasta la vista baby",
+        createdAt: DateTime.fromSQL("2023-12-07 22:00:00.000000 +00:00"),
       },
     ]);
   }

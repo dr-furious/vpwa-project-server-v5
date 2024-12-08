@@ -27,7 +27,8 @@
       "optional": true
     },
     "./start/events",
-    "./start/orm"
+    "./start/orm",
+    "./start/cron"
   ],
   "providers": [
     "./providers/AppProvider",

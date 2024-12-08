@@ -1,5 +1,6 @@
 import BaseSeeder from "@ioc:Adonis/Lucid/Seeder";
 import Channel, { ChannelType } from "App/Models/Channel";
+import { DateTime } from "luxon";
 
 export default class ChannelSeeder extends BaseSeeder {
   public async run() {
@@ -10,36 +11,37 @@ export default class ChannelSeeder extends BaseSeeder {
         name: "Football",
         type: ChannelType.Public,
         createdBy: 1,
-        numberOfUsers: 4,
-        numberOfMessages: 19,
       },
       {
         name: "Chill",
         type: ChannelType.Public,
-        createdBy: 2,
-        numberOfUsers: 4,
-        numberOfMessages: 14,
+        createdBy: 3,
       },
       {
         name: "D&D",
         type: ChannelType.Private,
         createdBy: 3,
-        numberOfUsers: 4,
-        numberOfMessages: 17,
       },
       {
-        name: "Beer Wednesday",
+        name: "BeerWednesday",
         type: ChannelType.Private,
         createdBy: 3,
-        numberOfUsers: 1,
-        numberOfMessages: 0,
       },
       {
-        name: "GoT Fans",
+        name: "GoT_Fans",
         type: ChannelType.Private,
         createdBy: 3,
-        numberOfUsers: 1,
-        numberOfMessages: 0,
+      },
+      {
+        name: "IWillBeGone:(",
+        type: ChannelType.Private,
+        createdBy: 1,
+      },
+      {
+        name: "IWillBeGoneToo:(",
+        type: ChannelType.Private,
+        createdBy: 1,
+        createdAt: DateTime.fromSQL("2023-12-07 21:00:00.000000 +00:00"),
       },
     ]);
   }
