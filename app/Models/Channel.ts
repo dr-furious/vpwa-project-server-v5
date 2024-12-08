@@ -1,5 +1,12 @@
 import { DateTime } from "luxon";
-import { BaseModel, column, HasMany, hasMany, ManyToMany, manyToMany } from "@ioc:Adonis/Lucid/Orm";
+import {
+  BaseModel,
+  column,
+  HasMany,
+  hasMany,
+  ManyToMany,
+  manyToMany,
+} from "@ioc:Adonis/Lucid/Orm";
 import Message from "App/Models/Message";
 import User from "./User";
 
@@ -20,12 +27,6 @@ export default class Channel extends BaseModel {
 
   @column()
   public type: ChannelType;
-
-  @column()
-  public numberOfUsers: number;
-
-  @column()
-  public numberOfMessages: number;
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime;

@@ -108,6 +108,20 @@ export default class extends BaseSeeder {
         user_role: user_role.Member,
         user_channel_status: user_channel_status.PendingInvite,
       },
+      {
+        user_id: 1,
+        channel_id: 6,
+        kicks: 0,
+        user_role: user_role.Admin,
+        user_channel_status: user_channel_status.InChannel,
+      },
+      {
+        user_id: 1,
+        channel_id: 7,
+        kicks: 0,
+        user_role: user_role.Admin,
+        user_channel_status: user_channel_status.InChannel,
+      },
     ]);
   }
 }
